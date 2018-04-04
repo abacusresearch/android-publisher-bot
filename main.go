@@ -1,6 +1,7 @@
 package main
 
 import (
+    "encoding/base64"
     "fmt"
     "github.com/nlopes/slack"
     "golang.org/x/oauth2"
@@ -398,10 +399,10 @@ func handleSlackMessages() {
 }
 
 func loadAndroidPublisherCredentials() *jwt.Config {
-    data, err := ioutil.ReadFile(getEnvironmentVariable("ANDROID_PUBLISHER_CREDENTIALS"))
+    data, err := base64.StdEncoding.DecodeString(getEnvironmentVariable("ANDROID_PUBLISHER_CREDENTIALS"))
 
     if err != nil {
-        postSlackMessage("Cannot read credentials: %v", err)
+        postSlackMessage("Cannot decode credentials: %v", err)
         return nil
     }
 
