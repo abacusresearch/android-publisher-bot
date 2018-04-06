@@ -27,9 +27,11 @@ func addVersionCodeToPlayStoreTrack(
         edit *androidpublisher.AppEdit,
         track *androidpublisher.Track,
         appId string,
-        appVersionCode int64) bool {
+        appVersionCode int64,
+        userFraction float64) bool {
     postSlackMessage("Adding version code *%v* to track *%v*.", appVersionCode, track.Track)
 
+    track.UserFraction = userFraction
     track.VersionCodes = append(track.VersionCodes, appVersionCode)
 
     _, err := publisher.Edits.Tracks.
@@ -117,7 +119,7 @@ func doDeploy(artifactId string, version string) {
 
     // Add the current version to the target track.
 
-    if !addVersionCodeToPlayStoreTrack(publisher, edit, track, appId, apk.VersionCode) {
+    if !addVersionCodeToPlayStoreTrack(publisher, edit, track, appId, apk.VersionCode, 0) {
         return
     }
 
@@ -202,7 +204,7 @@ func doPromote(appId string, appVersionCode int64, playStoreTrack string) {
         return
     }
 
-    if !addVersionCodeToPlayStoreTrack(publisher, edit, track, appId, appVersionCode) {
+    if !addVersionCodeToPlayStoreTrack(publisher, edit, track, appId, appVersionCode, 0) {
         return
     }
 
