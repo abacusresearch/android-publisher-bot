@@ -431,7 +431,11 @@ func doShowTracks(appId string) {
     }
 
     for _, track := range tracks.Tracks {
-        postSlackMessage("Track *%v* contains version codes *%v*.", track.Track, track.VersionCodes)
+        if track.UserFraction == 0 {
+            postSlackMessage("Track *%v* contains version codes *%v*.", track.Track, track.VersionCodes)
+        } else {
+            postSlackMessage("Track *%v* contains version codes *%v* at *%v%%*.", track.Track, track.VersionCodes, track.UserFraction * 100)
+        }
     }
 
     postSlackMessage("Done.")
