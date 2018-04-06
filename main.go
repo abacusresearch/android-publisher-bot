@@ -46,6 +46,28 @@ func addVersionCodeToPlayStoreTrack(
     return true
 }
 
+func changeUserFraction(
+        publisher *androidpublisher.Service,
+        edit *androidpublisher.AppEdit,
+        track *androidpublisher.Track,
+        appId string,
+        userFraction float64) bool {
+    postSlackMessage("Changing user fraction for track *%v*.", track.Track)
+
+    track.UserFraction = userFraction
+
+    _, err := publisher.Edits.Tracks.
+            Update(appId, edit.Id, track.Track, track).
+            Do()
+
+    if err != nil {
+        postSlackMessage("Sorry, I cannot update the track: %v", err)
+        return false
+    }
+
+    return true
+}
+
 func doDeploy(artifactId string, version string) {
     postSlackMessage("Ok, deploying *%v* with version *%v* ...", artifactId, version)
 
@@ -322,29 +344,40 @@ func doRollout(appId string, appVersionCode int64, userPercentage int) {
         }
     }
 
+    exists := false
+
     for _, candidate := range track.VersionCodes {
         if candidate == appVersionCode {
-            postSlackMessage("Version code *%v* already exists in track *%v*.", appVersionCode, "rollout")
-            return
+            exists = true
         }
-    }
-
-    // Remove all lower versions from the target track.
-
-    if !removeAllVersionCodesFromPlayStoreTrack(publisher, edit, track, appId) {
-       return
-    }
-
-    // Move the current version to the target tracks.
-
-    if !removeVersionCodeFromPlayStoreTracks(publisher, edit, tracks.Tracks, appId, appVersionCode) {
-        return
     }
 
     userFraction := float64(userPercentage) / 100
 
-    if !addVersionCodeToPlayStoreTrack(publisher, edit, track, appId, appVersionCode, userFraction) {
-        return
+    if !exists {
+
+        // Remove all lower versions from the target track.
+
+        if !removeAllVersionCodesFromPlayStoreTrack(publisher, edit, track, appId) {
+            return
+        }
+
+        // Move the current version to the target tracks.
+
+        if !removeVersionCodeFromPlayStoreTracks(publisher, edit, tracks.Tracks, appId, appVersionCode) {
+            return
+        }
+
+        if !addVersionCodeToPlayStoreTrack(publisher, edit, track, appId, appVersionCode, userFraction) {
+            return
+        }
+    } else {
+
+        // Change the user fraction.
+
+        if !changeUserFraction(publisher, edit, track, appId, userFraction) {
+            return
+        }
     }
 
     _, err = publisher.Edits.
