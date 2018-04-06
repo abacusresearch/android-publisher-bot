@@ -506,7 +506,11 @@ func getEnvironmentVariable(name string) string {
 func handleSlackMessage(event *slack.MessageEvent) {
     text := event.Msg.Text
 
-    log.Printf("#%v %v", event.Channel, text)
+    if len(event.User) == 0 {
+        log.Printf("#%v %v", event.Channel, text)
+    } else {
+        log.Printf("#%v %v: %v", event.Channel, event.User, text)
+    }
 
     if event.Channel != getEnvironmentVariable("SLACK_BOT_CHANNEL_ID") {
         return
@@ -561,6 +565,15 @@ func handleSlackMessage(event *slack.MessageEvent) {
             return
         }
 
+        playStoreTrack := command[3]
+
+        if playStoreTrack != "alpha" && playStoreTrack != "beta" && playStoreTrack != "internal" {
+            if event.User != getEnvironmentVariable("SLACK_GOD_USER_ID") {
+                postSlackMessage("Sorry, only god can do that.")
+                return
+            }
+        }
+
         doPromote(command[1], appVersionCode, command[3])
         return
     }
@@ -583,6 +596,11 @@ func handleSlackMessage(event *slack.MessageEvent) {
 
         if err != nil {
             postSlackMessage("Sorry, I don't understand that user percentage.")
+            return
+        }
+
+        if event.User != getEnvironmentVariable("SLACK_GOD_USER_ID") {
+            postSlackMessage("Sorry, only god can do that.")
             return
         }
 
