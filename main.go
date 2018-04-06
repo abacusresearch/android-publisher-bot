@@ -358,6 +358,7 @@ func handleSlackMessage(event *slack.MessageEvent) {
 
         if err != nil {
             postSlackMessage("Sorry, I don't understand that version code.")
+            return
         }
 
         doPromote(command[1], appVersionCode, command[3])
