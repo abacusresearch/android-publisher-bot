@@ -135,6 +135,62 @@ func doDeploy(artifactId string, version string) {
     postSlackMessage("Done.")
 }
 
+func doHalt(appId string, appVersionCode int64) {
+    postSlackMessage("Ok, halting *%v* with version code *%v* ...", appId, appVersionCode)
+
+    credentials := loadAndroidPublisherCredentials()
+
+    if credentials == nil {
+        return
+    }
+
+    client := credentials.Client(oauth2.NoContext)
+
+    publisher, err := androidpublisher.New(client)
+
+    if err != nil {
+        postSlackMessage("Sorry, I cannot create the publisher: %v", err)
+        return
+    }
+
+    appId = fmt.Sprintf("%v.%v", getEnvironmentVariable("ANDROID_APP_ID_PREFIX"), appId)
+
+    edit, err := publisher.Edits.
+            Insert(appId, nil).
+            Do()
+
+    if err != nil {
+        postSlackMessage("Sorry, I cannot insert the edit: %v", err)
+        return
+    }
+
+    tracks, err := publisher.Edits.Tracks.
+            List(appId, edit.Id).
+            Do()
+
+    if err != nil {
+        postSlackMessage("Sorry, I cannot list the tracks: %v", err)
+        return
+    }
+
+    // Remove the version from all tracks.
+
+    if !removeVersionCodeFromPlayStoreTracks(publisher, edit, tracks.Tracks, appId, appVersionCode) {
+        return
+    }
+
+    _, err = publisher.Edits.
+            Commit(appId, edit.Id).
+            Do()
+
+    if err != nil {
+        postSlackMessage("Sorry, I cannot commit the edit: %v", err)
+        return
+    }
+
+    postSlackMessage("Done.")
+}
+
 func doHelp() {
     postSlackMessage("Sorry, I don't understand.")
 }
@@ -433,6 +489,24 @@ func handleSlackMessage(event *slack.MessageEvent) {
 
     if len(command) > 0 {
         doDeploy(command[1], command[2])
+        return
+    }
+
+    // Handle the 'halt' command.
+
+    command = regexp.
+            MustCompile("<[^>]+> +halt +([^ ]+) +([^ ]+)").
+            FindStringSubmatch(text)
+
+    if len(command) > 0 {
+        appVersionCode, err := strconv.ParseInt(command[2], 10, 64)
+
+        if err != nil {
+            postSlackMessage("Sorry, I don't understand that version code.")
+            return
+        }
+
+        doHalt(command[1], appVersionCode)
         return
     }
 
