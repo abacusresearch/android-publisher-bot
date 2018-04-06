@@ -28,7 +28,7 @@ func addVersionCodeToPlayStoreTrack(
         track *androidpublisher.Track,
         appId string,
         appVersionCode int64) bool {
-    postSlackMessage("Adding version code *%v* to track *%v*", appVersionCode, track.Track)
+    postSlackMessage("Adding version code *%v* to track *%v*.", appVersionCode, track.Track)
 
     track.VersionCodes = append(track.VersionCodes, appVersionCode)
 
@@ -37,7 +37,7 @@ func addVersionCodeToPlayStoreTrack(
             Do()
 
     if err != nil {
-        postSlackMessage("Cannot update track: %v", err)
+        postSlackMessage("Sorry, I cannot update the track: %v", err)
         return false
     }
 
@@ -45,10 +45,7 @@ func addVersionCodeToPlayStoreTrack(
 }
 
 func doDeploy(artifactId string, version string) {
-    postSlackMessage(
-            "Ok, deploying *%v* with version *%v* ...",
-            artifactId,
-            version)
+    postSlackMessage("Ok, deploying *%v* with version *%v* ...", artifactId, version)
 
     artifactUrl := locateMavenArtifact(artifactId, version)
     artifactFile := downloadMavenArtifact(artifactUrl)
@@ -70,7 +67,7 @@ func doDeploy(artifactId string, version string) {
     publisher, err := androidpublisher.New(client)
 
     if err != nil {
-        postSlackMessage("Cannot create publisher: %v", err)
+        postSlackMessage("Sorry, I cannot create the publisher: %v", err)
         return
     }
 
@@ -81,7 +78,7 @@ func doDeploy(artifactId string, version string) {
             Do()
 
     if err != nil {
-        postSlackMessage("Cannot insert edit: %v", err)
+        postSlackMessage("Sorry, I cannot insert the edit: %v", err)
         return
     }
 
@@ -91,7 +88,7 @@ func doDeploy(artifactId string, version string) {
             Do()
 
     if err != nil {
-        postSlackMessage("Cannot upload APK: %v", err)
+        postSlackMessage("Sorry, I cannot upload the APK: %v", err)
         return
     }
 
@@ -100,7 +97,7 @@ func doDeploy(artifactId string, version string) {
             Do()
 
     if err != nil {
-        postSlackMessage("Cannot list tracks: %v", err)
+        postSlackMessage("Sorry, I cannot list the tracks: %v", err)
         return
     }
 
@@ -129,7 +126,7 @@ func doDeploy(artifactId string, version string) {
             Do()
 
     if err != nil {
-        postSlackMessage("Cannot commit edit: %v", err)
+        postSlackMessage("Sorry, I cannot commit the edit: %v", err)
         return
     }
 
@@ -137,15 +134,11 @@ func doDeploy(artifactId string, version string) {
 }
 
 func doHelp() {
-    postSlackMessage("I don't understand that command.")
+    postSlackMessage("Sorry, I don't understand.")
 }
 
 func doPromote(appId string, appVersionCode int64, playStoreTrack string) {
-    postSlackMessage(
-            "Ok, promoting *%v* with version code *%v* to track *%v*.",
-            appId,
-            appVersionCode,
-            playStoreTrack)
+    postSlackMessage("Ok, promoting *%v* with version code *%v* to track *%v* ...", appId, appVersionCode, playStoreTrack)
 
     credentials := loadAndroidPublisherCredentials()
 
@@ -158,7 +151,7 @@ func doPromote(appId string, appVersionCode int64, playStoreTrack string) {
     publisher, err := androidpublisher.New(client)
 
     if err != nil {
-        postSlackMessage("Cannot create publisher: %v", err)
+        postSlackMessage("Sorry, I cannot create the publisher: %v", err)
         return
     }
 
@@ -169,7 +162,7 @@ func doPromote(appId string, appVersionCode int64, playStoreTrack string) {
             Do()
 
     if err != nil {
-        postSlackMessage("Cannot insert edit: %v", err)
+        postSlackMessage("Sorry, I cannot insert the edit: %v", err)
         return
     }
 
@@ -178,7 +171,7 @@ func doPromote(appId string, appVersionCode int64, playStoreTrack string) {
             Do()
 
     if err != nil {
-        postSlackMessage("Cannot list tracks: %v", err)
+        postSlackMessage("Sorry, I cannot list the tracks: %v", err)
         return
     }
 
@@ -192,7 +185,7 @@ func doPromote(appId string, appVersionCode int64, playStoreTrack string) {
 
     for _, candidate := range track.VersionCodes {
         if candidate == appVersionCode {
-            postSlackMessage("Version code *%v* already exists in track *%v*", appVersionCode, playStoreTrack)
+            postSlackMessage("Version code *%v* already exists in track *%v*.", appVersionCode, playStoreTrack)
             return
         }
     }
@@ -218,7 +211,7 @@ func doPromote(appId string, appVersionCode int64, playStoreTrack string) {
             Do()
 
     if err != nil {
-        postSlackMessage("Cannot commit edit: %v", err)
+        postSlackMessage("Sorry, I cannot commit the edit: %v", err)
         return
     }
 
@@ -226,7 +219,7 @@ func doPromote(appId string, appVersionCode int64, playStoreTrack string) {
 }
 
 func doShowTracks(appId string) {
-    postSlackMessage("Ok, showing tracks for app *%v*.", appId)
+    postSlackMessage("Ok, showing tracks for *%v* ...", appId)
 
     credentials := loadAndroidPublisherCredentials()
 
@@ -239,7 +232,7 @@ func doShowTracks(appId string) {
     publisher, err := androidpublisher.New(client)
 
     if err != nil {
-        postSlackMessage("Cannot create publisher: %v", err)
+        postSlackMessage("Sorry, I cannot create the publisher: %v", err)
         return
     }
 
@@ -250,7 +243,7 @@ func doShowTracks(appId string) {
             Do()
 
     if err != nil {
-        postSlackMessage("Cannot insert edit: %v", err)
+        postSlackMessage("Sorry, I cannot insert the edit: %v", err)
         return
     }
 
@@ -259,12 +252,12 @@ func doShowTracks(appId string) {
             Do()
 
     if err != nil {
-        postSlackMessage("Cannot list tracks: %v", err)
+        postSlackMessage("Sorry, I cannot list the tracks: %v", err)
         return
     }
 
     for _, track := range tracks.Tracks {
-        postSlackMessage("Track *%v* contains version codes %v.", track.Track, track.VersionCodes)
+        postSlackMessage("Track *%v* contains version codes *%v*.", track.Track, track.VersionCodes)
     }
 
     postSlackMessage("Done.")
@@ -276,7 +269,7 @@ func downloadMavenArtifact(url string) *os.File {
     request, err := http.NewRequest("GET", url, nil)
 
     if err != nil {
-        postSlackMessage("Cannot create HTTP request: %v", err)
+        postSlackMessage("Sorry, I cannot create the HTTP request: %v", err)
         return nil
     }
 
@@ -287,35 +280,35 @@ func downloadMavenArtifact(url string) *os.File {
     response, err := client.Do(request)
 
     if err != nil {
-        postSlackMessage("Cannot execute HTTP request: %v", err)
+        postSlackMessage("Sorry, I cannot execute the HTTP request: %v", err)
         return nil
     }
 
     defer response.Body.Close()
 
     if response.StatusCode != 200 {
-        postSlackMessage("Unexpected HTTP status: %v", response.StatusCode)
+        postSlackMessage("Sorry, I didn't expect that HTTP status code: %v", response.StatusCode)
         return nil
     }
 
     result, err := ioutil.TempFile("", "")
 
     if err != nil {
-        postSlackMessage("Cannot create temporary file: %v", err)
+        postSlackMessage("Sorry, I cannot create the temporary file: %v", err)
         return nil
     }
 
     _, err = io.Copy(result, response.Body)
 
     if err != nil {
-        postSlackMessage("Cannot write temporary file: %v", err)
+        postSlackMessage("Sorry, I cannot write the temporary file: %v", err)
         return nil
     }
 
     _, err = result.Seek(0, 0)
 
     if err != nil {
-        postSlackMessage("Cannot seek in temporary file: %v", err)
+        postSlackMessage("Sorry, I cannot seek in the temporary file: %v", err)
         return nil
     }
 
@@ -326,7 +319,7 @@ func getEnvironmentVariable(name string) string {
     result := os.Getenv(name)
 
     if len(result) == 0 {
-        log.Fatalf("Cannot get environment variable: %v", name)
+        log.Fatalf("Sorry, I cannot get the environment variable: %v", name)
     }
 
     return result
@@ -364,7 +357,7 @@ func handleSlackMessage(event *slack.MessageEvent) {
         appVersionCode, err := strconv.ParseInt(command[2], 10, 64)
 
         if err != nil {
-            postSlackMessage("I don't understand that version code.")
+            postSlackMessage("Sorry, I don't understand that version code.")
         }
 
         doPromote(command[1], appVersionCode, command[3])
@@ -402,7 +395,7 @@ func loadAndroidPublisherCredentials() *jwt.Config {
     data, err := base64.StdEncoding.DecodeString(getEnvironmentVariable("ANDROID_PUBLISHER_CREDENTIALS"))
 
     if err != nil {
-        postSlackMessage("Cannot decode credentials: %v", err)
+        postSlackMessage("Sorry, I cannot decode the credentials: %v", err)
         return nil
     }
 
@@ -411,7 +404,7 @@ func loadAndroidPublisherCredentials() *jwt.Config {
             "https://www.googleapis.com/auth/androidpublisher")
 
     if err != nil {
-        postSlackMessage("Cannot parse credentials: %v", err)
+        postSlackMessage("Sorry, I cannot parse the credentials: %v", err)
         return nil
     }
 
@@ -447,7 +440,7 @@ func postSlackMessage(message string, arguments ...interface{}) {
             slack.NewPostMessageParameters())
 
     if err != nil {
-        log.Fatalf("Cannot post message: %v", err)
+        log.Fatalf("Sorry, I cannot post the message: %v", err)
     }
 }
 
@@ -457,7 +450,7 @@ func removeAllVersionCodesFromPlayStoreTrack(
         track *androidpublisher.Track,
         appId string) bool {
     for _, versionCode := range track.VersionCodes {
-        postSlackMessage("Removing version code *%v* from track *%v*", versionCode, track.Track)
+        postSlackMessage("Removing version code *%v* from track *%v*.", versionCode, track.Track)
     }
 
     track.VersionCodes = []int64 {}
@@ -467,7 +460,7 @@ func removeAllVersionCodesFromPlayStoreTrack(
             Do()
 
     if err != nil {
-        postSlackMessage("Cannot update track: %v", err)
+        postSlackMessage("Sorry, I cannot update the track: %v", err)
         return false
     }
 
@@ -485,7 +478,7 @@ func removeVersionCodeFromPlayStoreTracks(
 
         for _, candidate := range track.VersionCodes {
             if candidate == appVersionCode {
-                postSlackMessage("Removing version code *%v* from track *%v*", candidate, track.Track)
+                postSlackMessage("Removing version code *%v* from track *%v*.", candidate, track.Track)
             } else {
                 appVersionCodes = append(appVersionCodes, candidate)
             }
@@ -498,7 +491,7 @@ func removeVersionCodeFromPlayStoreTracks(
                 Do()
 
         if err != nil {
-            postSlackMessage("Cannot update track: %v", err)
+            postSlackMessage("Sorry, I cannot update the track: %v", err)
             return false
         }
     }
